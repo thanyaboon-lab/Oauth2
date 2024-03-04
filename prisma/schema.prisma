@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model OAuthClient {
+  clientId     String       @id
+  clientSecret String
+  redirectUris String[]
+  grants       String[]
+  tokens       OAuthToken[]
+  OAuthCode    OAuthCode[]
+}
+
+model OAuthCode {
+  authorizationCode String      @id
+  expiresAt         DateTime
+  redirectUri       String
+  scope             String
+  clientId          String
+  client            OAuthClient @relation(fields: [clientId], references: [clientId])
+  userId            Int
+  user              User        @relation(fields: [userId], references: [id])
+}
+
+model OAuthToken {
+  id                    String      @id @default(uuid())
+  accessToken           String
+  accessTokenExpiresAt  DateTime
+  refreshToken          String?     @unique
+  refreshTokenExpiresAt DateTime?
+  scope                 String
+  client                OAuthClient @relation(fields: [clientId], references: [clientId])
+  clientId              String
+  user                  User        @relation(fields: [userId], references: [id])
+  userId                Int
+}
+
+model User {
+  id        Int          @id @default(autoincrement())
+  username  String       @unique
+  password  String
+  tokens    OAuthToken[]
+  OAuthCode OAuthCode[]
+}
