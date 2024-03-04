@@ -1,4 +1,4 @@
-import OAuth2Server, { AuthorizationCodeModel } from "oauth2-server";
+import OAuth2Server from 'oauth2-server';
 import prisma from "../lib/prisma";
 
 async function generateAuthorizationCode(client: OAuth2Server.Client, user: OAuth2Server.User, scope: string) {
@@ -14,12 +14,10 @@ async function getClient(clientId: string, clientSecret: string): Promise<OAuth2
   console.log('🚀 ~ getClient:', clientId, clientSecret)
   const client = await prisma.oAuthClient.findUnique({
     where: {
-      clientId,
-      AND: {
-        clientSecret
-      }
+      clientId
     },
   });
+  console.log('🚀 ~ client:', client)
   if (client) {
     return {
       id: client.clientId,
@@ -126,7 +124,9 @@ async function getAuthorizationCode(authorizationCode: string): Promise<OAuth2Se
  * Save authorization code.
  */
 async function saveAuthorizationCode(code: OAuth2Server.AuthorizationCode, client: OAuth2Server.Client, user: OAuth2Server.User): Promise<OAuth2Server.AuthorizationCode> {
-  console.log('🚀 ~ saveAuthorizationCode:', code, client, user)
+  console.log('🚀 ~ saveAuthorizationCode:', code)
+  console.log('🚀 ~ user:', user)
+  console.log('🚀 ~ client:', client)
   const authorizationCode = {
     authorizationCode: code.authorizationCode,
     expiresAt: code.expiresAt,
@@ -135,6 +135,7 @@ async function saveAuthorizationCode(code: OAuth2Server.AuthorizationCode, clien
     clientId: client.id,
     userId: user.id
   };
+  console.log('🚀 ~ authorizationCode:', authorizationCode)
   await prisma.oAuthCode.create({
     data: authorizationCode
   });
@@ -211,4 +212,4 @@ export default {
   getAccessToken,
   getClient,
   getRefreshToken
-} as AuthorizationCodeModel;
+} as OAuth2Server.AuthorizationCodeModel;

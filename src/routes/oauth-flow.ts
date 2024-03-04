@@ -1,4 +1,4 @@
-import express from "express";
+import express from 'express';
 import {authorize, token, authenticate} from "../services/oauth2.service";
 
 const router = express.Router();
